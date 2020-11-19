@@ -112,13 +112,13 @@ for(t in tau)
     y1 <- filter[,2]
     reg = lm(y1~x1)
     beta1 <- (reg$coefficients[2])
-    c1 <- reg$coefficients[1]
-    ypred <- beta1*x+c1
+    cd1 <- reg$coefficients[1]
+    ypred <- beta1*x+cd1
     currmse <- MSE(y_pred = ypred, y_true = y)
     minMSE1 <- min(currmse,minMSE1)
     if(minMSE1 == currmse){
       bet1 <- beta1
-      coe1 <- c1 
+      coe1 <- cd1 
     }
     
   }
@@ -137,3 +137,10 @@ BootstrapMSE2 <- (sum((b2-bet2)^2)+sum((c2-coe2)^2))/nboot
 BootstrapMSE1
 BootstrapMSE2
 print(BootstrapMSE1<BootstrapMSE2)
+
+plot(x,y,main="TM and LTS Regression for DJIA historical price data",xlab="Time",ylab="Price")
+lines(abline(reg,col="red",lty=1))
+lines(abline(reglts,col="blue",lty=2))
+legend(1980,4000,legend=c("Trimmed Mean Regression","LTS Regression"), col=c("red","blue"),lty=c(1,2), ncol=1)
+minMSE1
+minMSE2

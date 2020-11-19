@@ -1,7 +1,7 @@
 library(MLmetrics)
 library(quantreg )
 library(robustbase)
-
+library(ggplot2)
 
   
 tau = seq(0.05,0.5,0.05)
@@ -44,8 +44,10 @@ for(i in 1:100)
   epsilon <- rnorm(100,mean=0,sd=3)
   x <- runif(100,0,100)
   y <- 0.5*x+epsilon
-  x <- c(x,runif(10,0,100))
-  y <- c(y,rnorm(10,0,10))
+  xex <- runif(10,0,100)
+  x <- c(x,xex)
+  yex <- .5*xex + rnorm(10,0,20)
+  y <- c(y,yex)
   minMSE1 <- 999999999999
   minMSE2 <- 999999999999
   for(t in tau){
@@ -74,4 +76,35 @@ MSE_LTS
 result <- MSE_LTS < MSE_TM
 print(sum(result))
 
+plot(x,y,main="Visualisation of regression quantiles",)
+lines(abline(rq(y~x,0),col="red",lty=1))
+lines(abline(rq(y~x,1),col="blue",lty=2))
+lines(abline(rq(y~x,.5),col="green",lty=3))
+legend(1,50,legend=c(expression(paste( theta ,"=0 ")),expression(paste( theta ,"=1 ")),expression(paste( theta ,"=0.5 "))), col=c("red","blue","green"),lty=c(1,2,3), ncol=1)
+
+minMSE1 <- 999999999999
+minMSE2 <- 999999999999
+for(t in tau){
+  if(t!=0.5){
+    xy <- filtered(t,x,y)
+    x1 <- xy[,1]
+    y1 <- xy[,2]
+    reg <- lm(y1~x1)
+    beta1 <- (reg$coefficients[2])
+    c1 <- reg$coefficients[1]
+    ypred <- beta1*x+c1
+    currmse <- MSE(y_pred = ypred, y_true = y)
+    minMSE1 <- min(currmse,minMSE1)
+  }
+  
+  reglts <- ltsReg(x,y,alpha=1-t)
+  currmse <- MSE(y_pred = (reglts$fitted.values), y_true = y)
+  minMSE2 <- min(currmse,minMSE2)
+}
+plot(x,y,main="Comparision of Trimmed Mean and LTS Regression",)
+lines(abline(reg,col="red",lty=1))
+lines(abline(reglts,col="blue",lty=2))
+legend(1,70,legend=c("Trimmed Mean Regression","LTS Regression"), col=c("red","blue"),lty=c(1,2), ncol=1)
+minMSE1 
+minMSE2
 
