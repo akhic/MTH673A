@@ -1,0 +1,26 @@
+library(MASS)
+library(ddalpha)
+library(LaplacesDemon)
+library(matrixcalc)
+Sigma <- matrix(c(1,0,0,0,1,0,0,0,1),3,3,3)
+Sigma
+mu = c(0,0,0)
+N_sample <- 100
+n <- 1000
+abs_depth <- 1:n
+
+for (i in 1:n){
+  data1 <- mvrnorm(n=N_sample,mu,Sigma)
+  data2 <- mvrnorm(n=N_sample,mu,Sigma)
+  data <- rbind(data1,data2)
+  dep1 <- depth.halfspace(data,data1)
+  dep2 <- depth.halfspace(data,data2)
+  distance <- sum(abs(dep1-dep2))/N_sample 
+  abs_depth[i] <- distance
+  
+  
+}
+quantile(abs_depth,probs = c(0.05, 0.95))
+abs_depth
+#n =100, N_sample = 100, 95% quantile : 0.059545
+#n =1000, N_sample = 100, 95% quantile : 0.063505
